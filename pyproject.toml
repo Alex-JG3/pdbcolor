@@ -9,12 +9,23 @@ authors = [
 ]
 description = "A simple package to add code highlighting to the python debugger (PDB)."
 readme = "README.md"
+requires-python = ">=3.9"
 dependencies = [
     "pygments",
 ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
 version = "0.0.1"
+license = "MIT"
+license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [
     "ruff"
 ]
+
+[project.urls]
+Homepage = "https://github.com/Alex-JG3/pdbcolor"
+Issues = "https://github.com/Alex-JG3/pdbcolor/issues"
