@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdbcolor"
+authors = [
+    {name = "Alex Gregory"},
+]
+description = "A simple package to add code highlighting to the python debugger (PDB)."
+readme = "README.md"
+dependencies = [
+    "pygments",
+]
+version = "0.0.1"
+
+[project.optional-dependencies]
+dev = [
+    "ruff"
+]
