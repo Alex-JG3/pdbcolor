@@ -1,4 +1,5 @@
 from pdb import Pdb
+import sys
 
 from pygments import highlight
 from pygments.lexers import PythonLexer
@@ -96,6 +97,8 @@ class LineNumberFilter(Filter):
                 yield ttype, value
 
 
-def set_trace(*args, **kwargs):
-    debugger = PdbColor(*args, **kwargs)
-    debugger.set_trace()
+def set_trace():
+    debugger = PdbColor()
+
+    # The arguments here are copied from the PDB implementation of 'set_trace'
+    debugger.set_trace(sys._getframe().f_back)
