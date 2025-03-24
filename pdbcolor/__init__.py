@@ -1,8 +1,10 @@
 from pdb import Pdb
 import sys
 
+import pygments
 from pygments import highlight
 from pygments.lexers import PythonLexer
+from pygments.lexer import RegexLexer
 from pygments.formatters import TerminalFormatter
 from pygments.token import Operator, Literal, Text, Generic, Comment
 from pygments.formatters.terminal import TERMINAL_COLORS
@@ -16,9 +18,13 @@ class PdbColor(Pdb):
         self.colors[Comment] = ("green", "brightgreen")
 
         self.lexer = PythonLexer()
-        self.lexer.add_filter(CurrentLineFilter())
-        self.lexer.add_filter(LineNumberFilter())
         self.formatter = TerminalFormatter(colorscheme=self.colors)
+
+        self.pdb_lexer = PdbLexer()
+        self.prompt = highlight("(Pdb)", self.pdb_lexer, self.formatter).rstrip() + " "
+        self.breakpoint_char = highlight("B", self.pdb_lexer, self.formatter).rstrip()
+        self.currentline_char = highlight("->", self.pdb_lexer, self.formatter).rstrip()
+        self.prompt_char = highlight(">>", self.pdb_lexer, self.formatter).rstrip()
 
     def highlight_lines(self, lines: list[str]):
         lines_highlighted = highlight("".join(lines), self.lexer, self.formatter)
@@ -27,6 +33,7 @@ class PdbColor(Pdb):
 
     def _print_lines(self, lines, start, breaks=(), frame=None):
         """Print a range of lines."""
+        lines = self.highlight_lines(lines)
         if frame:
             current_lineno = frame.f_lineno
             exc_lineno = self.tb_lineno.get(frame, -1)
@@ -38,17 +45,15 @@ class PdbColor(Pdb):
             if len(s) < 4:
                 s += " "
             if lineno in breaks:
-                s += "B"
+                s += self.breakpoint_char
             else:
                 s += " "
             if lineno == current_lineno:
-                s += "->"
+                s += self.currentline_char
             elif lineno == exc_lineno:
-                s += ">>"
-            formatted_lines.append(s + "\t" + line.rstrip() + "\n")
-            # self.message(s + '\t' + line.rstrip())
-        highlighted_lines = self.highlight_lines(formatted_lines)
-        for line in highlighted_lines:
+                s += self.prompt_char
+            formatted_lines.append(s + "\t" + line.rstrip())
+        for line in formatted_lines:
             self.message(line)
 
 
@@ -95,6 +100,22 @@ class LineNumberFilter(Filter):
                 previous_token_was_newline = False
             else:
                 yield ttype, value
+
+
+
+class PdbLexer(RegexLexer):
+    name = "Pdb"
+    alias = ["pdb"]
+    filenames = ["*"]
+
+    tokens = {
+        "root": [
+            (r"\(Pdb\)", Generic.Subheading),
+            (r"->", Generic.Subheading),
+            (r">>", Generic.Subheading),
+            (r"B", Generic.Subheading),
+        ]
+    }
 
 
 def set_trace():
