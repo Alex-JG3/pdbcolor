@@ -25,6 +25,8 @@ class PdbColor(Pdb):
         self.breakpoint_char = highlight("B", self.pdb_lexer, self.formatter).rstrip()
         self.currentline_char = highlight("->", self.pdb_lexer, self.formatter).rstrip()
         self.prompt_char = highlight(">>", self.pdb_lexer, self.formatter).rstrip()
+        self.line_prefix = f"\n{self.currentline_char} "
+        self.prefix = highlight(">", self.pdb_lexer, self.formatter).rstrip() + " "
 
     def highlight_lines(self, lines: list[str]):
         lines_highlighted = highlight("".join(lines), self.lexer, self.formatter)
@@ -119,6 +121,17 @@ class PdbColor(Pdb):
 
     do_l = do_list
 
+    def print_stack_entry(self, frame_lineno, prompt_prefix=None):
+        if prompt_prefix is None:
+            prompt_prefix = self.line_prefix
+        frame, lineno = frame_lineno
+        if frame is self.curframe:
+            prefix = self.prefix
+        else:
+            prefix = '  '
+        self.message(prefix +
+                     self.format_stack_entry(frame_lineno, prompt_prefix))
+
 
 class CurrentLineFilter(Filter):
     """Class for combining PDB's current line symbol ('->') into one token."""
@@ -175,6 +188,7 @@ class PdbLexer(RegexLexer):
             (r"\(Pdb\)", Generic.Subheading),
             (r"->", Generic.Subheading),
             (r">>", Generic.Subheading),
+            (r">", Generic.Subheading),
             (r"B", Generic.Subheading),
         ]
     }
