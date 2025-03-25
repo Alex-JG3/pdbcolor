@@ -6,7 +6,7 @@ from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.lexer import RegexLexer
 from pygments.formatters import TerminalFormatter
-from pygments.token import Operator, Literal, Text, Generic, Comment
+from pygments.token import Operator, Literal, Text, Generic, Comment, Name
 from pygments.formatters.terminal import TERMINAL_COLORS
 from pygments.filter import Filter
 
@@ -27,6 +27,7 @@ class PdbColor(Pdb):
         self.prompt_char = highlight(">>", self.pdb_lexer, self.formatter).rstrip()
         self.line_prefix = f"\n{self.currentline_char} "
         self.prefix = highlight(">", self.pdb_lexer, self.formatter).rstrip() + " "
+        self.eof = highlight("[EOF]", self.pdb_lexer, self.formatter).rstrip()
 
     def highlight_lines(self, lines: list[str]):
         lines_highlighted = highlight("".join(lines), self.lexer, self.formatter)
@@ -115,7 +116,7 @@ class PdbColor(Pdb):
             )
             self.lineno = min(last, len(lines))
             if len(lines) < last:
-                self.message("[EOF]")
+                self.message(self.eof)
         except KeyboardInterrupt:
             pass
 
@@ -190,6 +191,7 @@ class PdbLexer(RegexLexer):
             (r">>", Generic.Subheading),
             (r">", Generic.Subheading),
             (r"B", Generic.Subheading),
+            (r"\[EOF\]", Name.Function),
         ]
     }
 
