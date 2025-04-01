@@ -1,6 +1,7 @@
 from pdb import Pdb
 import sys
 import linecache
+import reprlib
 
 from pygments import highlight
 from pygments.lexers import PythonLexer
@@ -18,6 +19,7 @@ class PdbColor(Pdb):
         self.colors[Comment] = ("green", "brightgreen")
 
         self.lexer = PythonLexer()
+        self.path_lexer = PathLexer()
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
         self.pdb_lexer = PdbLexer()
@@ -134,6 +136,36 @@ class PdbColor(Pdb):
                      self.format_stack_entry(frame_lineno, prompt_prefix))
 
 
+    def format_stack_entry(self, frame_lineno, lprefix=': '):
+        """Return a string with information about a stack entry.
+
+        The stack entry frame_lineno is a (frame, lineno) tuple.  The
+        return string contains the canonical filename, the function name
+        or '<lambda>', the input arguments, the return value, and the
+        line of code (if it exists).
+
+        """
+        frame, lineno = frame_lineno
+        filename = self.canonic(frame.f_code.co_filename)
+        s = '%s(%r)' % (filename, lineno)
+
+        if frame.f_code.co_name:
+            s += frame.f_code.co_name
+        else:
+            s += "<lambda>"
+        s += '()'
+        if '__return__' in frame.f_locals:
+            rv = frame.f_locals['__return__']
+            s += '->'
+            s += reprlib.repr(rv)
+
+        s = highlight(s, self.path_lexer, self.formatter).strip()
+        line = linecache.getline(filename, lineno, frame.f_globals)
+        if line:
+            s += lprefix + line.strip()
+        return s
+
+
 class CurrentLineFilter(Filter):
     """Class for combining PDB's current line symbol ('->') into one token."""
 
@@ -192,6 +224,20 @@ class PdbLexer(RegexLexer):
             (r">", Generic.Subheading),
             (r"B", Generic.Subheading),
             (r"\[EOF\]", Name.Function),
+        ]
+    }
+
+
+class PathLexer(RegexLexer):
+    name = "Path"
+    alias = ["path"]
+    filenames = ["*"]
+
+    tokens = {
+        "root": [
+            (r'[^/()]+', Name.Attribute),  # Match everything but '/'
+            (r'->', Generic.Subheading),  # Match '/'
+            (r'[/()<>]', Generic.Subheading),  # Match '/'
         ]
     }
 
