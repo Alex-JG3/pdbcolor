@@ -13,6 +13,29 @@ from pygments.filter import Filter
 
 
 class PdbColor(Pdb):
+    _colors = {
+        "black": 30,
+        "red": 31,
+        "green": 32,
+        "yellow": 33,
+        "blue": 34,
+        "purple": 35,
+        "cyan": 36,
+        "white": 37,
+        "Black": 40,
+        "Red": 41,
+        "Green": 42,
+        "Yellow": 43,
+        "Blue": 44,
+        "Purple": 45,
+        "Cyan": 46,
+        "White": 47,
+        "bold": 1,
+        "light": 2,
+        "blink": 5,
+        "invert": 7,
+    }
+
     def __init__(self):
         super().__init__()
         self.colors = TERMINAL_COLORS.copy()
@@ -22,14 +45,16 @@ class PdbColor(Pdb):
         self.path_lexer = PathLexer()
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
-        self.pdb_lexer = PdbLexer()
-        self.prompt = highlight("(Pdb)", self.pdb_lexer, self.formatter).rstrip() + " "
-        self.breakpoint_char = highlight("B", self.pdb_lexer, self.formatter).rstrip()
-        self.currentline_char = highlight("->", self.pdb_lexer, self.formatter).rstrip()
-        self.prompt_char = highlight(">>", self.pdb_lexer, self.formatter).rstrip()
-        self.line_prefix = f"\n{self.currentline_char} "
-        self.prefix = highlight(">", self.pdb_lexer, self.formatter).rstrip() + " "
-        self.eof = highlight("[EOF]", self.pdb_lexer, self.formatter).rstrip()
+        self.prompt = self._highlight("(Pdb) ", "purple")
+        self.breakpoint_char = self._highlight("B", "red")
+        self.currentline_char = self._highlight("->", "red")
+        self.prompt_char = self._highlight(">>", "purple")
+        self.line_prefix = f"\n{self._highlight('->', 'purple')} "
+        self.prefix = self._highlight(">", "purple") + " "
+        self.eof = self._highlight("[EOF]", "green")
+
+    def _highlight(self, text: str, color: str) -> str:
+        return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
 
     def highlight_lines(self, lines: list[str]):
         lines_highlighted = highlight("".join(lines), self.lexer, self.formatter)
