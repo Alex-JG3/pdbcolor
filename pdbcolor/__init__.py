@@ -191,31 +191,6 @@ class PdbColor(Pdb):
         return s
 
 
-class CurrentLineFilter(Filter):
-    """Class for combining PDB's current line symbol ('->') into one token."""
-
-    def __init__(self, **options):
-        Filter.__init__(self, **options)
-
-    def filter(self, lexer, stream):
-        previous_token_was_subtract = False
-        for ttype, value in stream:
-            if previous_token_was_subtract:
-                if ttype is Operator and value == ">":
-                    # Combine '->' into one token
-                    yield Generic.Subheading, "->"
-                else:
-                    # Yield previous subtract token and current token separately
-                    yield Operator, "-"
-                    yield ttype, value
-                previous_token_was_subtract = False
-            else:
-                if ttype is Operator and value == "-":
-                    previous_token_was_subtract = True
-                else:
-                    yield ttype, value
-
-
 class LineNumberFilter(Filter):
     """Class for converting PDB's line numbers into tokens."""
 
