@@ -7,9 +7,8 @@ from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.lexer import RegexLexer
 from pygments.formatters import TerminalFormatter
-from pygments.token import Operator, Literal, Text, Generic, Comment, Name
+from pygments.token import Generic, Comment, Name
 from pygments.formatters.terminal import TERMINAL_COLORS
-from pygments.filter import Filter
 
 
 class PdbColor(Pdb):
