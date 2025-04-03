@@ -191,26 +191,6 @@ class PdbColor(Pdb):
         return s
 
 
-class LineNumberFilter(Filter):
-    """Class for converting PDB's line numbers into tokens."""
-
-    def __init__(self, **options):
-        Filter.__init__(self, **options)
-
-    def filter(self, lexer, stream):
-        previous_token_was_newline = True
-
-        for ttype, value in stream:
-            if ttype is Text.Whitespace and value == "\n":
-                previous_token_was_newline = True
-                yield ttype, value
-            elif previous_token_was_newline and ttype is Literal.Number.Integer:
-                yield Literal.String, value
-                previous_token_was_newline = False
-            else:
-                yield ttype, value
-
-
 class PathLexer(RegexLexer):
     name = "Path"
     alias = ["path"]
