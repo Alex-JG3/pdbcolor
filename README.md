@@ -2,26 +2,37 @@
 
 Add some color to the python debugger.
 
-## Installation and Setup
+## Installation
 
-Can be installed with `pip`.
+Install with `pip`.
 
-```
+```shell
 pip install pdbcolor
 ```
 
-Once installed, set the environment variable `PYTHONBREAKPOINT` to
-`pdbcolor.set_trace`. This can be done with the `export` command with a POSIX
-compliant shell.
+## Setup
 
+Python can be configured to use PDB Color by changing the `PYTHONBREAKPOINT`
+environment variable. To use PDB Color temporarily, add the 
+`PYTHONBREAKPOINT=pdbcolor.set_trace` prefix before running your python script:
+
+```shell
+PYTHONBREAKPOINT=pdbcolor.set_trace python3 main.py
 ```
+
+To make PDB Color the default for all Python sessions, set the
+`PYTHONBREAKPOINT` environment variable to `pdbcolor.set_trace`. On Mac and
+Linux, you can do this with the `export` command:
+
+```shell
 export PYTHONBREAKPOINT=pdbcolor.set_trace
 ```
 
-`pdbcolor` can be used temporarily by adding the
-`PYTHONBREAKPOINT=pdbcolor.set_trace` prefix before running a python script.
-For example:
+Add this line to your terminal configuration file (e.g. `.bashrc` or `.zshrc`)
+to ensure the setting persists across terminal settings.
 
-```
-PYTHONBREAKPOINT=pdbcolor.set_trace python3 main.py
-```
+## Usage
+
+PDB Color is a drop-in replacement for PDB that simply adds color to PDB's
+outputs. See the [PDB documentation](https://docs.python.org/3/library/pdb.html)
+for a PDB introduction.
