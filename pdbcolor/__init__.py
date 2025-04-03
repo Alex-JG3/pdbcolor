@@ -72,7 +72,7 @@ class PdbColor(Pdb):
             current_lineno = exc_lineno = -1
         formatted_lines = []
         for lineno, line in enumerate(lines, start):
-            s = str(lineno).rjust(3)
+            s = self._highlight(str(lineno), "yellow").rjust(3)
             if len(s) < 4:
                 s += " "
             if lineno in breaks:
