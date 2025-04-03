@@ -236,23 +236,6 @@ class LineNumberFilter(Filter):
                 yield ttype, value
 
 
-class PdbLexer(RegexLexer):
-    name = "Pdb"
-    alias = ["pdb"]
-    filenames = ["*"]
-
-    tokens = {
-        "root": [
-            (r"\(Pdb\)", Generic.Subheading),
-            (r"->", Generic.Subheading),
-            (r">>", Generic.Subheading),
-            (r">", Generic.Subheading),
-            (r"B", Generic.Subheading),
-            (r"\[EOF\]", Name.Function),
-        ]
-    }
-
-
 class PathLexer(RegexLexer):
     name = "Path"
     alias = ["path"]
