@@ -36,3 +36,13 @@ to ensure the setting persists across terminal settings.
 PDB Color is a drop-in replacement for PDB that simply adds color to PDB's
 outputs. See the [PDB documentation](https://docs.python.org/3/library/pdb.html)
 for a PDB introduction.
+
+## Examples
+
+Using PDB:
+
+![Code example using PDB](images/before.png)
+
+Using PDB Color:
+
+![Code example using PDB](images/after.png)
