@@ -2,6 +2,7 @@ from pdb import Pdb
 import sys
 import linecache
 import reprlib
+import string
 
 from pygments import highlight
 from pygments.lexers import PythonLexer
@@ -56,9 +57,38 @@ class PdbColor(Pdb):
         return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
 
     def highlight_lines(self, lines: list[str]):
-        lines_highlighted = highlight("".join(lines), self.lexer, self.formatter)
-        lines = lines_highlighted.split("\n")
-        return lines
+        whitespace = set(string.whitespace)
+
+        for i in range(len(lines)):
+            if not set(lines[i]).issubset(whitespace):
+                first_non_whitespace_line = i
+                break
+
+        for i in range(len(lines) - 1, 0, -1):
+            if not set(lines[i]).issubset(whitespace):
+                last_non_whitespace_line = i
+                break
+
+        # Pygment's highlight function strips newlines at the start and end.
+        # These lines are important so we add them back in later
+        lines_highlighted = (
+            highlight(
+                "".join(lines[first_non_whitespace_line: last_non_whitespace_line + 1]),
+                self.lexer,
+                self.formatter
+            )
+            .strip("\n")
+            .split("\n")
+        )
+
+        lines_highlighted = [line + "\n" for line in lines_highlighted]
+
+        final = (
+            lines[:first_non_whitespace_line]
+            + lines_highlighted
+            + lines[last_non_whitespace_line + 1:]
+        )
+        return final
 
     def _print_lines(self, lines, start, breaks=(), frame=None, highlight=True):
         """Print a range of lines."""
