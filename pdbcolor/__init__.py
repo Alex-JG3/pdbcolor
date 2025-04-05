@@ -3,6 +3,7 @@ import sys
 import linecache
 import reprlib
 import string
+import inspect
 
 from pygments import highlight
 from pygments.lexers import PythonLexer
@@ -218,6 +219,37 @@ class PdbColor(Pdb):
         if line:
             s += lprefix + line.strip()
         return s
+
+
+    def do_longlist(self, arg):
+        """longlist | ll
+        List the whole source code for the current function or frame.
+
+        This has been copied over and unmodified to fix the issues with line
+        numbers. See, https://github.com/Alex-JG3/pdbcolor/issues/5
+        """
+        filename = self.curframe.f_code.co_filename
+        breaklist = self.get_file_breaks(filename)
+        try:
+            lines, lineno = getsourcelines(self.curframe)
+        except OSError as err:
+            self.error(err)
+            return
+        self._print_lines(lines, lineno, breaklist, self.curframe)
+    do_ll = do_longlist
+
+
+def getsourcelines(obj):
+    """This has been copied over and unmodified to fix the issues with line
+    numbers. See, https://github.com/Alex-JG3/pdbcolor/issues/5
+    """
+    lines, lineno = inspect.findsource(obj)
+    if inspect.isframe(obj) and obj.f_globals is obj.f_locals:
+        # must be a module frame: do not try to cut a block out of it
+        return lines, 1
+    elif inspect.ismodule(obj):
+        return lines, 1
+    return inspect.getblock(lines[lineno:]), lineno+1
 
 
 class PathLexer(RegexLexer):
