@@ -45,8 +45,8 @@ class PdbColor(Pdb):
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
         self.prompt = self._highlight("(Pdb) ", "purple")
-        self.breakpoint_char = self._highlight("B", "red")
-        self.currentline_char = self._highlight("->", "red")
+        self.breakpoint_char = self._highlight("B", "purple")
+        self.currentline_char = self._highlight("->", "purple")
         self.prompt_char = self._highlight(">>", "purple")
         self.line_prefix = f"\n{self._highlight('->', 'purple')} "
         self.prefix = self._highlight(">", "purple") + " "
