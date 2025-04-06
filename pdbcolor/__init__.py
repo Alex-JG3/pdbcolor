@@ -2,8 +2,8 @@ from pdb import Pdb
 import sys
 import re
 import linecache
-import reprlib
 import string
+import rlcompleter
 
 from pygments import highlight
 from pygments.lexers import PythonLexer
@@ -57,6 +57,9 @@ class PdbColor(Pdb):
 
     def _highlight(self, text: str, color: str) -> str:
         return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
+
+    # Autocomplete
+    complete = rlcompleter.Completer(locals()).complete
 
     def highlight_lines(self, lines: list[str]):
         whitespace = set(string.whitespace)
