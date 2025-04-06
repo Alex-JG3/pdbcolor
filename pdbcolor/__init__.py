@@ -50,7 +50,8 @@ class PdbColor(Pdb):
         self.breakpoint_char = self._highlight("B", "purple")
         self.currentline_char = self._highlight("->", "purple")
         self.prompt_char = self._highlight(">>", "purple")
-        self.line_prefix = f"\n{self._highlight('->', 'purple')} "
+        self.line_prefix = self._highlight('->', 'purple')
+        self._return = self._highlight("--Return--", "green")
         self.prefix = self._highlight(">", "purple") + " "
         self.eof = self._highlight("[EOF]", "green")
 
@@ -92,6 +93,10 @@ class PdbColor(Pdb):
         return final
 
     def _print_lines(self, lines, start, breaks=(), frame=None):
+        if len(lines) == 0:
+            super()._print_lines(lines, start, breaks, frame)
+            return
+
         filename = self.curframe.f_code.co_filename
         all_lines = linecache.getlines(filename, self.curframe.f_globals)
         lines_highlighted = self.highlight_lines(all_lines)
@@ -110,30 +115,19 @@ class PdbColor(Pdb):
             )
 
 
-    def print_stack_entry(self, frame_lineno, prompt_prefix=None):
-        if prompt_prefix is None:
-            prompt_prefix = self.line_prefix
-        frame, lineno = frame_lineno
-        if frame is self.curframe:
-            prefix = self.prefix
-        else:
-            prefix = '  '
-        self.message(prefix +
-                     self.format_stack_entry(frame_lineno, prompt_prefix))
-
     def message(self, msg: str):
-        if msg.startswith("\x1b"):
-            # The message starts with a ANSI escape character so is probably
-            # already highlight so needs no further text highlighting
-            super().message(msg)
-            return
-
         if msg == "[EOF]":
             super().message(self.eof)
-            return
-
-        msg = self.highlight_line_numbers_and_pdb_chars(msg)
-        super().message(msg)
+        if msg == "--Return--":
+            super().message(self._return)
+        elif msg[0] == ">":
+            path, current_line = msg.split("\n")
+            path = self.prefix + highlight(path[2:], self.path_lexer, self.formatter)
+            current_line = self.line_prefix + " " + current_line[3:]
+            super().message(path + current_line)
+        else:
+            msg = self.highlight_line_numbers_and_pdb_chars(msg)
+            super().message(msg)
 
     def highlight_line_numbers_and_pdb_chars(self, msg):
         line_number_match = re.search(r"\d+", msg)
@@ -152,35 +146,6 @@ class PdbColor(Pdb):
             msg = msg[:start] + line_number + msg[end:]
 
         return msg.rstrip()
-
-    def format_stack_entry(self, frame_lineno, lprefix=': '):
-        """Return a string with information about a stack entry.
-
-        The stack entry frame_lineno is a (frame, lineno) tuple.  The
-        return string contains the canonical filename, the function name
-        or '<lambda>', the input arguments, the return value, and the
-        line of code (if it exists).
-
-        """
-        frame, lineno = frame_lineno
-        filename = self.canonic(frame.f_code.co_filename)
-        s = '%s(%r)' % (filename, lineno)
-
-        if frame.f_code.co_name:
-            s += frame.f_code.co_name
-        else:
-            s += "<lambda>"
-        s += '()'
-        if '__return__' in frame.f_locals:
-            rv = frame.f_locals['__return__']
-            s += '->'
-            s += reprlib.repr(rv)
-
-        s = highlight(s, self.path_lexer, self.formatter).strip()
-        line = linecache.getline(filename, lineno, frame.f_globals)
-        if line:
-            s += lprefix + line.strip()
-        return s
 
 
 class PathLexer(RegexLexer):
