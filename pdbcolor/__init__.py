@@ -118,7 +118,7 @@ class PdbColor(Pdb):
     def message(self, msg: str):
         if msg == "[EOF]":
             super().message(self.eof)
-        if msg == "--Return--":
+        elif msg == "--Return--":
             super().message(self._return)
         elif msg[0] == ">":
             path, current_line = msg.split("\n")
