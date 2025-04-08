@@ -54,6 +54,7 @@ class PdbColor(Pdb):
         self._return = self._highlight("--Return--", "green")
         self.prefix = self._highlight(">", "purple") + " "
         self.eof = self._highlight("[EOF]", "green")
+        self.tag = ":TAG:"
 
     def _highlight(self, text: str, color: str) -> str:
         return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
@@ -86,7 +87,11 @@ class PdbColor(Pdb):
             .split("\n")
         )
 
-        lines_highlighted = [line + "\n" for line in lines_highlighted]
+        # Add tag to the end of each line to allow code lines to be more easily
+        # identified
+        lines_highlighted = [
+            line + "\n" + self.tag for line in lines_highlighted
+        ]
 
         final = (
             lines[:first_non_whitespace_line]
@@ -119,18 +124,23 @@ class PdbColor(Pdb):
 
 
     def message(self, msg: str):
-        if msg == "[EOF]":
-            super().message(self.eof)
-        elif msg == "--Return--":
-            super().message(self._return)
+        if msg.endswith(self.tag):
+            msg = self.highlight_line_numbers_and_pdb_chars(self.remove_tag(msg))
+            super().message(msg)
         elif msg[0] == ">":
             path, current_line = msg.split("\n")
             path = self.prefix + highlight(path[2:], self.path_lexer, self.formatter)
             current_line = self.line_prefix + " " + current_line[3:]
             super().message(path + current_line)
+        elif msg == "--Return--":
+            super().message(self._return)
+        elif msg == "[EOF]":
+            super().message(self.eof)
         else:
-            msg = self.highlight_line_numbers_and_pdb_chars(msg)
             super().message(msg)
+
+    def remove_tag(self, text):
+        return text[:-5]
 
     def highlight_line_numbers_and_pdb_chars(self, msg):
         line_number_match = re.search(r"\d+", msg)
