@@ -69,3 +69,20 @@ Using PDB:
 Using PDB Color:
 
 ![Code example using PDB](images/after.png)
+
+## Pytest
+
+In pytest, using `breakpoint()` in your unit tests will put you into PDB by
+default. To use PDB Color instead, set `--pdbcls=pdbcolor:PdbColor`. For
+example:
+
+```shell
+python3 -m pytest --pdbcls=pdbcolor:PdbColor
+```
+
+To invoke PDB Color upon the failure of a test (post-mortem) rather than a
+breakpoint, use the `--pdb` option:
+
+```shell
+python3 -m pytest --pdbcls=pdbcolor:PdbColor
+```
