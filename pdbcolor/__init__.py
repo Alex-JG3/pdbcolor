@@ -36,9 +36,16 @@ class PdbColor(Pdb):
         "blink": 5,
         "invert": 7,
     }
-
-    def __init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        completekey='tab',
+        stdin=None,
+        stdout=None,
+        skip=None,
+        nosigint=False,
+        readrc=True,
+    ):
+        super().__init__(completekey, stdin, stdout, skip, nosigint, readrc)
         self.colors = TERMINAL_COLORS.copy()
         self.colors[Comment] = ("green", "brightgreen")
 
@@ -175,7 +182,7 @@ class PathLexer(RegexLexer):
     }
 
 
-def set_trace():
+def set_trace(frame=None):
     debugger = PdbColor()
 
     # The arguments here are copied from the PDB implementation of 'set_trace'
