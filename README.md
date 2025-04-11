@@ -84,5 +84,5 @@ To invoke PDB Color upon the failure of a test (post-mortem) rather than a
 breakpoint, use the `--pdb` option:
 
 ```shell
-python3 -m pytest --pdbcls=pdbcolor:PdbColor
+python3 -m pytest --pdbcls=pdbcolor:PdbColor --pdb
 ```
