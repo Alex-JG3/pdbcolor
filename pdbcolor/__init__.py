@@ -163,7 +163,8 @@ class PdbColor(Pdb):
     def highlight_line_numbers_and_pdb_chars(self, code_line: str) -> str:
         """Highlight line numbers and pdb characters in line of code.
 
-        For example, in the following line ' 11  ->  for i in range(10):', The line number and current line character '->' will be highlighted.
+        For example, in the following line ' 11  ->  for i in range(10):', The
+        line number and current line character '->' will be highlighted.
 
         Parameters
         ----------
