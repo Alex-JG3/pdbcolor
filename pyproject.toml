@@ -23,7 +23,8 @@ license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [
-    "ruff"
+    "ruff",
+    "pre-commit"
 ]
 
 [project.urls]
