@@ -1,15 +1,15 @@
-from pdb import Pdb
-import sys
-import re
 import linecache
+import re
 import rlcompleter
+import sys
+from pdb import Pdb
 
 from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.lexer import RegexLexer
 from pygments.formatters import TerminalFormatter
-from pygments.token import Generic, Comment, Name
 from pygments.formatters.terminal import TERMINAL_COLORS
+from pygments.lexer import RegexLexer
+from pygments.lexers import PythonLexer
+from pygments.token import Comment, Generic, Name
 
 
 class PdbColor(Pdb):
