@@ -59,7 +59,7 @@ class PdbColor(Pdb):
         self.prompt_char = self._highlight(">>", "purple")
         self.line_prefix = self._highlight('->', 'purple')
         self._return = self._highlight("--Return--", "green")
-        self.prefix = self._highlight(">", "purple") + " "
+        self.path_prefix = self._highlight(">", "purple") + " "
         self.eof = self._highlight("[EOF]", "green")
         self.tag = ":TAG:"
 
@@ -72,8 +72,8 @@ class PdbColor(Pdb):
     def highlight_code(self, lines: list[str]) -> list[str]:
         """Highlight code and 'tag' to end of each line for easy identification.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         lines: list[str]
             Lines of python code.
 
@@ -110,65 +110,86 @@ class PdbColor(Pdb):
 
         return lines[:first] + highlighted + lines[last + 1:]
 
-    def _print_lines(self, lines, start, breaks=(), frame=None):
+    def _print_lines(self, lines: list[str], start: int, breaks=(), frame=None):
+        """Print a range of lines.
+
+        Parameters
+        ----------
+        lines: list[str]
+            List of lines to print.
+        start: int
+            The line number of the first line in 'lines'
+        """
         if len(lines) == 0:
             super()._print_lines(lines, start, breaks, frame)
             return
 
+        # Highlight all lines to improve the highlighting accuracy. Highlighting
+        # just a few lines can lead to mistakes
         filename = self.curframe.f_code.co_filename
         all_lines = linecache.getlines(filename, self.curframe.f_globals)
-        lines_highlighted = self.highlight_code(all_lines)
+        highlighted = self.highlight_code(all_lines)
 
+        # Line numbers start at 0 or 1 depending on the python version. The
+        # following helps to ensure line number begins at 1.
         if lines[0] == all_lines[start]:
-            # The lines numbers start at 0, we add one to make the line numbers
-            # start from 1
+            # The lines numbers start at 0, force then to start at 1
             super()._print_lines(
-                lines_highlighted[start: start + len(lines)], start + 1, breaks, frame
+                highlighted[start: start + len(lines)], start + 1, breaks, frame
             )
         else:
-            # The lines numbers start at 1, we add one to make the line numbers
-            # start from 0
+            # The lines numbers start at 1
             super()._print_lines(
-                lines_highlighted[start - 1: start + len(lines)], start, breaks, frame
+                highlighted[start - 1: start + len(lines)], start, breaks, frame
             )
 
 
     def message(self, msg: str):
+        """Highlight and print message to stdout."""
         if msg.endswith(self.tag):
-            msg = self.highlight_line_numbers_and_pdb_chars(self.remove_tag(msg))
-            super().message(msg)
+            # Check if 'msg' is a line of code
+            msg = self.highlight_line_numbers_and_pdb_chars(msg.rstrip(self.tag))
         elif msg[0] == ">":
+            # 'msg' contains the current line and path
             path, current_line = msg.split("\n")
-            path = self.prefix + highlight(path[2:], self.path_lexer, self.formatter)
-            current_line = self.line_prefix + " " + current_line[3:]
-            super().message(path + current_line)
+            path = highlight(path[2:], self.path_lexer, self.formatter)
+            msg = self.path_prefix + path + self.line_prefix + " " + current_line[3:]
         elif msg == "--Return--":
-            super().message(self._return)
+            msg = self._return
         elif msg == "[EOF]":
-            super().message(self.eof)
+            msg = self.eof
+        super().message(msg.rstrip())
+
+    def highlight_line_numbers_and_pdb_chars(self, code_line: str) -> str:
+        """Highlight line numbers and pdb characters in line of code.
+
+        For example, in the following line ' 11  ->  for i in range(10):', The line number and current line character '->' will be highlighted.
+
+        Parameters
+        ----------
+        code_line: str
+            Line of code to be highlighted.
+
+        Returns
+        -------
+        str
+            Highlighted line.
+        """
+        line_number = re.search(r"\d+", code_line)
+        if not line_number:
+            return code_line
+
+        start, end = line_number.span()
+        line_number = self._highlight(code_line[start:end], "yellow")
+
+        new_msg = code_line[:start] + line_number
+        if code_line[end + 2: end + 4] == "->":
+            new_msg += " " + self.currentline_char + " " + code_line[end + 4:]
+        elif code_line[end + 2] == "B":
+            new_msg += " " + self.breakpoint_char + "  " + code_line[end + 4:]
         else:
-            super().message(msg)
-
-    def remove_tag(self, text):
-        return text[:-5]
-
-    def highlight_line_numbers_and_pdb_chars(self, msg):
-        line_number_match = re.search(r"\d+", msg)
-
-        if not line_number_match:
-            return msg.rstrip()
-
-        start, end = line_number_match.span()
-        line_number = self._highlight(msg[start:end], "yellow")
-
-        if msg[end + 2: end + 4] == "->":
-            msg = msg[:start] + line_number + " " + self.currentline_char + " " + msg[end + 4:]
-        elif msg[end + 2] == "B":
-            msg = msg[:start] + line_number + " " + self.breakpoint_char + "  " + msg[end + 4:]
-        else:
-            msg = msg[:start] + line_number + msg[end:]
-
-        return msg.rstrip()
+            new_msg += code_line[end:]
+        return new_msg
 
 
 class PathLexer(RegexLexer):
