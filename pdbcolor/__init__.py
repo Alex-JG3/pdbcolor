@@ -2,7 +2,6 @@ from pdb import Pdb
 import sys
 import re
 import linecache
-import string
 import rlcompleter
 
 from pygments import highlight
@@ -36,9 +35,10 @@ class PdbColor(Pdb):
         "blink": 5,
         "invert": 7,
     }
+
     def __init__(
         self,
-        completekey='tab',
+        completekey="tab",
         stdin=None,
         stdout=None,
         skip=None,
@@ -57,7 +57,7 @@ class PdbColor(Pdb):
         self.breakpoint_char = self._highlight("B", "purple")
         self.currentline_char = self._highlight("->", "purple")
         self.prompt_char = self._highlight(">>", "purple")
-        self.line_prefix = self._highlight('->', 'purple')
+        self.line_prefix = self._highlight("->", "purple")
         self._return = self._highlight("--Return--", "green")
         self.path_prefix = self._highlight(">", "purple") + " "
         self.eof = self._highlight("[EOF]", "green")
@@ -99,16 +99,14 @@ class PdbColor(Pdb):
         # Pygment's highlight function strips newlines at the start and end.
         # These lines are important so we add them back in later
         highlighted: str = highlight(
-            "".join(lines[first: last + 1]),
-            self.lexer,
-            self.formatter
+            "".join(lines[first : last + 1]), self.lexer, self.formatter
         ).splitlines(keepends=True)
 
         # Add tag to the end of each line to allow code lines to be more easily
         # identified
         highlighted = [line + self.tag for line in highlighted]
 
-        return lines[:first] + highlighted + lines[last + 1:]
+        return lines[:first] + highlighted + lines[last + 1 :]
 
     def _print_lines(self, lines: list[str], start: int, breaks=(), frame=None):
         """Print a range of lines.
@@ -135,14 +133,13 @@ class PdbColor(Pdb):
         if lines[0] == all_lines[start]:
             # The lines numbers start at 0, force then to start at 1
             super()._print_lines(
-                highlighted[start: start + len(lines)], start + 1, breaks, frame
+                highlighted[start : start + len(lines)], start + 1, breaks, frame
             )
         else:
             # The lines numbers start at 1
             super()._print_lines(
-                highlighted[start - 1: start + len(lines)], start, breaks, frame
+                highlighted[start - 1 : start + len(lines)], start, breaks, frame
             )
-
 
     def message(self, msg: str):
         """Highlight and print message to stdout."""
@@ -184,10 +181,10 @@ class PdbColor(Pdb):
         line_number = self._highlight(code_line[start:end], "yellow")
 
         new_msg = code_line[:start] + line_number
-        if code_line[end + 2: end + 4] == "->":
-            new_msg += " " + self.currentline_char + " " + code_line[end + 4:]
+        if code_line[end + 2 : end + 4] == "->":
+            new_msg += " " + self.currentline_char + " " + code_line[end + 4 :]
         elif code_line[end + 2] == "B":
-            new_msg += " " + self.breakpoint_char + "  " + code_line[end + 4:]
+            new_msg += " " + self.breakpoint_char + "  " + code_line[end + 4 :]
         else:
             new_msg += code_line[end:]
         return new_msg
@@ -200,9 +197,9 @@ class PathLexer(RegexLexer):
 
     tokens = {
         "root": [
-            (r'[^/()]+', Name.Attribute),  # Match everything but '/'
-            (r'->', Generic.Subheading),  # Match '/'
-            (r'[/()<>]', Generic.Subheading),  # Match '/'
+            (r"[^/()]+", Name.Attribute),  # Match everything but '/'
+            (r"->", Generic.Subheading),  # Match '/'
+            (r"[/()<>]", Generic.Subheading),  # Match '/'
         ]
     }
 
