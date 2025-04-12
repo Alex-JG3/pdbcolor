@@ -69,43 +69,46 @@ class PdbColor(Pdb):
     # Autocomplete
     complete = rlcompleter.Completer(locals()).complete
 
-    def highlight_lines(self, lines: list[str]):
-        whitespace = set(string.whitespace)
+    def highlight_code(self, lines: list[str]) -> list[str]:
+        """Highlight code and 'tag' to end of each line for easy identification.
 
-        for i in range(len(lines)):
-            if not set(lines[i]).issubset(whitespace):
-                first_non_whitespace_line = i
+        Parameter
+        ---------
+        lines: list[str]
+            Lines of python code.
+
+        Returns
+        -------
+        list[str]
+            Highlighted lines of code.
+        """
+        # Find the index of the first non-whitespace character
+        first = 0
+        for i, line in enumerate(lines):
+            if not line.isspace():
+                first = i
                 break
 
+        # Find the index of the last non-whitespace character
+        last = len(lines)
         for i in range(len(lines) - 1, 0, -1):
-            if not set(lines[i]).issubset(whitespace):
-                last_non_whitespace_line = i
+            if not lines[i].isspace():
+                last = i
                 break
 
         # Pygment's highlight function strips newlines at the start and end.
         # These lines are important so we add them back in later
-        lines_highlighted = (
-            highlight(
-                "".join(lines[first_non_whitespace_line: last_non_whitespace_line + 1]),
-                self.lexer,
-                self.formatter
-            )
-            .strip("\n")
-            .split("\n")
-        )
+        highlighted: str = highlight(
+            "".join(lines[first: last + 1]),
+            self.lexer,
+            self.formatter
+        ).splitlines(keepends=True)
 
         # Add tag to the end of each line to allow code lines to be more easily
         # identified
-        lines_highlighted = [
-            line + "\n" + self.tag for line in lines_highlighted
-        ]
+        highlighted = [line + self.tag for line in highlighted]
 
-        final = (
-            lines[:first_non_whitespace_line]
-            + lines_highlighted
-            + lines[last_non_whitespace_line + 1:]
-        )
-        return final
+        return lines[:first] + highlighted + lines[last + 1:]
 
     def _print_lines(self, lines, start, breaks=(), frame=None):
         if len(lines) == 0:
@@ -114,7 +117,7 @@ class PdbColor(Pdb):
 
         filename = self.curframe.f_code.co_filename
         all_lines = linecache.getlines(filename, self.curframe.f_globals)
-        lines_highlighted = self.highlight_lines(all_lines)
+        lines_highlighted = self.highlight_code(all_lines)
 
         if lines[0] == all_lines[start]:
             # The lines numbers start at 0, we add one to make the line numbers
