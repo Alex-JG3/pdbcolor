@@ -86,3 +86,20 @@ breakpoint, use the `--pdb` option:
 ```shell
 python3 -m pytest --pdbcls=pdbcolor:PdbColor --pdb
 ```
+
+If you get a pytest OS error such as:
+
+```shell
+OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
+```
+
+And if you have changed your `PYTHONBREAKPOINT` environment variable to be
+`pdbcolor.set_trace`, try changing the `PYTHONBREAKPOINT` variable back to
+`pdbcolor.set_trace`. For example:
+
+```shell
+PYTHONBREAKPOINT=pdb.set_trace python3 -m pytest --pdbcls=pdbcolor:PdbColor
+```
+
+Pytest should use PDB Color as expected.
+
