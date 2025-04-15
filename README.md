@@ -72,20 +72,13 @@ Using PDB Color:
 
 ## Pytest
 
-In pytest, using `breakpoint()` in your unit tests will put you into PDB by
-default. To use PDB Color instead, set `--pdbcls=pdbcolor:PdbColor`. For
-example:
+To use PDB Color with pytest, use `--pdbcls=pdbcolor:PdbColor`. For example:
 
 ```shell
 python3 -m pytest --pdbcls=pdbcolor:PdbColor
 ```
 
-To invoke PDB Color upon the failure of a test (post-mortem) rather than a
-breakpoint, use the `--pdb` option:
-
-```shell
-python3 -m pytest --pdbcls=pdbcolor:PdbColor --pdb
-```
+This drops you into PDB Color when a breakpoint is reached.
 
 If you get a pytest OS error such as:
 
@@ -93,13 +86,25 @@ If you get a pytest OS error such as:
 OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
 ```
 
-And if you have changed your `PYTHONBREAKPOINT` environment variable to be
-`pdbcolor.set_trace`, try changing the `PYTHONBREAKPOINT` variable back to
-`pdbcolor.set_trace`. For example:
+Using the `-s` flag stops the error but, for those interested, the error is
+usually caused by setting `PYTHONBREAKPOINT=pdbcolor.set_trace`. Changing this
+back to its default value should stop the error without needing the `-s` flag.
+For example:
 
 ```shell
 PYTHONBREAKPOINT=pdb.set_trace python3 -m pytest --pdbcls=pdbcolor:PdbColor
 ```
 
-Pytest should use PDB Color as expected.
+To save on typing, consider adding the following aliases to your terminal
+configuration file:
 
+```shell
+alias pdb='PYTHONBREAKPOINT=pdb.set_trace'
+alias pdc='PYTHONBREAKPOINT=pdbcolor.set_trace'
+```
+
+The previous command then becomes:
+
+```shell
+pdb python3 -m pytest --pdbcls=pdbcolor:PdbColor
+```
