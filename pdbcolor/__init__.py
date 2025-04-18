@@ -191,7 +191,7 @@ class PdbColor(Pdb):
             new_msg += code_line[end:]
         return new_msg
 
-    def format_stack_entry(self, frame_lineno, lprefix=': '):
+    def format_stack_entry(self, frame_lineno, lprefix=": "):
         # Add tag to the end of stack entries to make them easier to identify later
         return super().format_stack_entry(frame_lineno, lprefix) + self.stack_tag
 
