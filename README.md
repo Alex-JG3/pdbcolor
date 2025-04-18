@@ -2,6 +2,14 @@
 
 Add some color to the python debugger.
 
+Using PDB:
+
+![Code example using PDB](images/before.png)
+
+Using PDB Color:
+
+![Code example using PDB](images/after.png)
+
 ## Installation
 
 Install with `pip`.
@@ -59,16 +67,6 @@ str.index(         str.isupper(       str.rindex(        str.upper(
 str.isalnum(       str.join(          str.rjust(         str.zfill(
 (Pdb) str.
 ```
-
-## Examples
-
-Using PDB:
-
-![Code example using PDB](images/before.png)
-
-Using PDB Color:
-
-![Code example using PDB](images/after.png)
 
 ## Pytest
 
