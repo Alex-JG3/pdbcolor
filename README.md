@@ -39,14 +39,10 @@ export PYTHONBREAKPOINT=pdbcolor.set_trace
 Add this line to your terminal configuration file (e.g. `.bashrc` or `.zshrc`)
 to ensure the setting persists across terminal settings.
 
-## Usage
+## Autocomplete
 
-PDB Color is a drop-in replacement for PDB that simply adds color to PDB's
-outputs. See the [PDB documentation](https://docs.python.org/3/library/pdb.html)
-for a PDB introduction.
-
-PDB Color also has tab autocompletion by default which can be triggered using
-the TAB key. For example:
+PDB Color also has autocompletion by default which can be triggered using the
+TAB key. For example:
 
 ```python
 $ python3 main.py
