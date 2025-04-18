@@ -62,6 +62,7 @@ class PdbColor(Pdb):
         self.path_prefix = self._highlight(">", "purple") + " "
         self.eof = self._highlight("[EOF]", "green")
         self.code_tag = ":TAG:"
+        self.stack_tag = ":STACK:"
 
     def _highlight(self, text: str, color: str) -> str:
         return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
@@ -146,11 +147,12 @@ class PdbColor(Pdb):
         if msg.endswith(self.code_tag):
             # Check if 'msg' is a line of code
             msg = self.highlight_line_numbers_and_pdb_chars(msg.rstrip(self.code_tag))
-        elif msg[0] == ">":
+        elif msg.endswith(self.stack_tag):
             # 'msg' contains the current line and path
-            path, current_line = msg.split("\n")
+            prefix = self.path_prefix if msg[0] == ">" else "  "
+            path, current_line = msg.rstrip(self.stack_tag).split("\n")
             path = highlight(path[2:], self.path_lexer, self.formatter)
-            msg = self.path_prefix + path + self.line_prefix + " " + current_line[3:]
+            msg = prefix + path + self.line_prefix + " " + current_line[3:]
         elif msg == "--Return--":
             msg = self._return
         elif msg == "[EOF]":
@@ -188,6 +190,10 @@ class PdbColor(Pdb):
         else:
             new_msg += code_line[end:]
         return new_msg
+
+    def format_stack_entry(self, frame_lineno, lprefix=': '):
+        # Add tag to the end of stack entries to make them easier to identify later
+        return super().format_stack_entry(frame_lineno, lprefix) + self.stack_tag
 
 
 class PathLexer(RegexLexer):
