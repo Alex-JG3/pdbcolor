@@ -64,6 +64,21 @@ str.isalnum(       str.join(          str.rjust(         str.zfill(
 (Pdb) str.
 ```
 
+## Post-mortem debugging
+
+PDB can can be triggered post-mortem (after an exception has been raised) with
+the following command:
+
+```shell
+python3 -m pdb -c continue main.py
+```
+
+PDB Color can be used instead by replacing `pdb` with `pdbcolor`.
+
+```shell
+python3 -m pdbcolor -c continue main.py
+```
+
 ## Pytest
 
 To use PDB Color with pytest, use `--pdbcls=pdbcolor:PdbColor`. For example:
