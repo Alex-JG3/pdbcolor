@@ -150,9 +150,15 @@ class PdbColor(Pdb):
         elif msg.endswith(self.stack_tag):
             # 'msg' contains the current line and path
             prefix = self.path_prefix if msg[0] == ">" else "  "
-            path, current_line = msg.rstrip(self.stack_tag).split("\n")
+            items = msg.rstrip(self.stack_tag).split("\n")
+            if len(items) == 1:
+                path = items[0]
+                current_line = ""
+            else:
+                path, current_line = msg.rstrip(self.stack_tag).split("\n")
+                current_line = self.line_prefix + " " + current_line[3:]
             path = highlight(path[2:], self.path_lexer, self.formatter)
-            msg = prefix + path + self.line_prefix + " " + current_line[3:]
+            msg = prefix + path + current_line
         elif msg == "--Return--":
             msg = self._return
         elif msg == "[EOF]":
