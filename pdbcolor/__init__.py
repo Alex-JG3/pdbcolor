@@ -59,7 +59,7 @@ class PdbColor(Pdb):
         self.prompt_char = self._highlight(">>", "purple")
         self.line_prefix = self._highlight("->", "purple")
         self._return = self._highlight("--Return--", "green")
-        self.path_prefix = self._highlight(">", "purple") + " "
+        self.path_prefix = self._highlight(">", "green") + " "
         self.eof = self._highlight("[EOF]", "green")
         self.code_tag = ":TAG:"
         self.stack_tag = ":STACK:"
