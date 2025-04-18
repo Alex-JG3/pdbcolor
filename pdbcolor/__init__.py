@@ -61,7 +61,7 @@ class PdbColor(Pdb):
         self._return = self._highlight("--Return--", "green")
         self.path_prefix = self._highlight(">", "purple") + " "
         self.eof = self._highlight("[EOF]", "green")
-        self.tag = ":TAG:"
+        self.code_tag = ":TAG:"
 
     def _highlight(self, text: str, color: str) -> str:
         return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
@@ -104,7 +104,7 @@ class PdbColor(Pdb):
 
         # Add tag to the end of each line to allow code lines to be more easily
         # identified
-        highlighted = [line + self.tag for line in highlighted]
+        highlighted = [line + self.code_tag for line in highlighted]
 
         return lines[:first] + highlighted + lines[last + 1 :]
 
@@ -143,9 +143,9 @@ class PdbColor(Pdb):
 
     def message(self, msg: str):
         """Highlight and print message to stdout."""
-        if msg.endswith(self.tag):
+        if msg.endswith(self.code_tag):
             # Check if 'msg' is a line of code
-            msg = self.highlight_line_numbers_and_pdb_chars(msg.rstrip(self.tag))
+            msg = self.highlight_line_numbers_and_pdb_chars(msg.rstrip(self.code_tag))
         elif msg[0] == ">":
             # 'msg' contains the current line and path
             path, current_line = msg.split("\n")
