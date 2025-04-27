@@ -69,13 +69,13 @@ class PdbColor(Pdb):
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
         self.prompt = self._highlight("(Pdb) ", self.colorscheme.pdb)
-        self.breakpoint_char = self._highlight("B", self.colorscheme.breakpoint_)
-        self.currentline_char = self._highlight("->", self.colorscheme.currentline)
-        self.prompt_char = self._highlight(">>", self.colorscheme.prompt)
-        self.line_prefix = self._highlight("->", self.colorscheme.line_prefix)
-        self._return = self._highlight("--Return--", self.colorscheme.return_)
-        self.path_prefix = self._highlight(">", self.colorscheme.path_prefix) + " "
-        self.eof = self._highlight("[EOF]", self.colorscheme.eof)
+        self.breakpoint_str = self._highlight("B", self.colorscheme.breakpoint_)
+        self.currentline_str = self._highlight("->", self.colorscheme.currentline)
+        self.prompt_str = self._highlight(">>", self.colorscheme.prompt)
+        self.line_prefix_str = self._highlight("->", self.colorscheme.line_prefix)
+        self.return_str = self._highlight("--Return--", self.colorscheme.return_)
+        self.path_prefix_str = self._highlight(">", self.colorscheme.path_prefix) + " "
+        self.eof_str = self._highlight("[EOF]", self.colorscheme.eof)
         self.code_tag = ":TAG:"
         self.stack_tag = ":STACK:"
 
@@ -164,20 +164,20 @@ class PdbColor(Pdb):
             msg = self.highlight_line_numbers_and_pdb_chars(msg.rstrip(self.code_tag))
         elif msg.endswith(self.stack_tag):
             # 'msg' contains the current line and path
-            prefix = self.path_prefix if msg[0] == ">" else "  "
+            prefix = self.path_prefix_str if msg[0] == ">" else "  "
             items = msg.rstrip(self.stack_tag).split("\n")
             if len(items) == 1:
                 path = items[0]
                 current_line = ""
             else:
                 path, current_line = msg.rstrip(self.stack_tag).split("\n")
-                current_line = self.line_prefix + " " + current_line[3:]
+                current_line = self.line_prefix_str + " " + current_line[3:]
             path = highlight(path[2:], self.path_lexer, self.formatter)
             msg = prefix + path + current_line
         elif msg == "--Return--":
-            msg = self._return
+            msg = self.return_str
         elif msg == "[EOF]":
-            msg = self.eof
+            msg = self.eof_str
         super().message(msg.rstrip())
 
     def highlight_line_numbers_and_pdb_chars(self, code_line: str) -> str:
@@ -205,7 +205,7 @@ class PdbColor(Pdb):
 
         new_msg = code_line[:start] + line_number
         if code_line[end + 2 : end + 4] == "->":
-            new_msg += " " + self.currentline_char + " " + code_line[end + 4 :]
+            new_msg += " " + self.currentline_str + " " + code_line[end + 4 :]
         elif code_line[end + 2] == "B":
             new_msg += " " + self.breakpoint_char + "  " + code_line[end + 4 :]
         else:
