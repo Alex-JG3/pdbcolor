@@ -69,13 +69,16 @@ class PdbColor(Pdb):
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
         self.prompt = self._highlight("(Pdb) ", self.colorscheme.pdb)
+        self.prompt_str = self._highlight(">>", self.colorscheme.prompt)
         self.breakpoint_str = self._highlight("B", self.colorscheme.breakpoint_)
         self.currentline_str = self._highlight("->", self.colorscheme.currentline)
-        self.prompt_str = self._highlight(">>", self.colorscheme.prompt)
+
         self.line_prefix_str = self._highlight("->", self.colorscheme.line_prefix)
-        self.return_str = self._highlight("--Return--", self.colorscheme.return_)
         self.path_prefix_str = self._highlight("> ", self.colorscheme.path_prefix)
+
         self.eof_str = self._highlight("[EOF]", self.colorscheme.eof)
+        self.return_str = self._highlight("--Return--", self.colorscheme.return_)
+
         self.code_tag = ":TAG:"
         self.stack_tag = ":STACK:"
 
