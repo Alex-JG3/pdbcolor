@@ -161,23 +161,53 @@ class PdbColor(Pdb):
                 highlighted[start - 1 : start + len(lines)], start, breaks, frame
             )
 
+    def is_code(self, msg: str) -> bool:
+        return msg.endswith(self.code_tag)
+
+    def is_stack(self, msg: str) -> bool:
+        return msg.endswith(self.stack_tag)
+
+    def highlight_stack(self, msg: str) -> str:
+        """Highlight stack message.
+
+        Stack messages usually contain two lines. The first is the path and the
+        second is the current line. For example:
+
+        > /home/documents/pdbcolor/main.py(11)<module>()
+        -> if __name__ == "__main__"
+
+        Sometimes, stack messages only contain the current line. This function
+        handles both cases.
+
+        Parameters
+        ----------
+        msg : str
+            A stack message.
+
+        Returns
+        -------
+        str
+            Highlighted stack message.
+        """
+        prefix = self.path_prefix_str if msg[0] == ">" else "  "
+        lines = msg.rstrip(self.stack_tag).split("\n")
+        if len(lines) == 1:
+            path = lines[0]
+            current_line = ""
+        elif len(lines) == 2:
+            path, current_line = lines
+            current_line = f"{self.line_prefix_str} {current_line[3:]}"
+            path = highlight(path[2:], self.path_lexer, self.formatter)
+        else:
+            raise RuntimeError("Stacks should have exactly one or two lines.")
+        return prefix + path + current_line
+
     def message(self, msg: str):
         """Highlight and print message to stdout."""
-        if msg.endswith(self.code_tag):
-            # Check if 'msg' is a line of code
+        if self.is_code(msg):
             msg = self.highlight_line_numbers_and_pdb_chars(msg.rstrip(self.code_tag))
-        elif msg.endswith(self.stack_tag):
-            # 'msg' contains the current line and path
-            prefix = self.path_prefix_str if msg[0] == ">" else "  "
-            items = msg.rstrip(self.stack_tag).split("\n")
-            if len(items) == 1:
-                path = items[0]
-                current_line = ""
-            else:
-                path, current_line = msg.rstrip(self.stack_tag).split("\n")
-                current_line = self.line_prefix_str + " " + current_line[3:]
-            path = highlight(path[2:], self.path_lexer, self.formatter)
-            msg = prefix + path + current_line
+        elif self.is_stack(msg):
+            msg = self.highlight_stack(msg.rstrip(self.stack_tag))
         elif msg == "--Return--":
             msg = self.return_str
         elif msg == "[EOF]":
