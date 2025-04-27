@@ -68,21 +68,22 @@ class PdbColor(Pdb):
         self.path_lexer = PathLexer()
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
-        self.prompt = self._highlight("(Pdb) ", self.colorscheme.pdb)
-        self.prompt_str = self._highlight(">>", self.colorscheme.prompt)
-        self.breakpoint_str = self._highlight("B", self.colorscheme.breakpoint_)
-        self.currentline_str = self._highlight("->", self.colorscheme.currentline)
+        self.prompt = self.ascii_highlight("(Pdb) ", self.colorscheme.pdb)
+        self.prompt_str = self.ascii_highlight(">>", self.colorscheme.prompt)
+        self.breakpoint_str = self.ascii_highlight("B", self.colorscheme.breakpoint_)
+        self.currentline_str = self.ascii_highlight("->", self.colorscheme.currentline)
 
-        self.line_prefix_str = self._highlight("->", self.colorscheme.line_prefix)
-        self.path_prefix_str = self._highlight("> ", self.colorscheme.path_prefix)
+        self.line_prefix_str = self.ascii_highlight("->", self.colorscheme.line_prefix)
+        self.path_prefix_str = self.ascii_highlight("> ", self.colorscheme.path_prefix)
 
-        self.eof_str = self._highlight("[EOF]", self.colorscheme.eof)
-        self.return_str = self._highlight("--Return--", self.colorscheme.return_)
+        self.eof_str = self.ascii_highlight("[EOF]", self.colorscheme.eof)
+        self.return_str = self.ascii_highlight("--Return--", self.colorscheme.return_)
 
         self.code_tag = ":TAG:"
         self.stack_tag = ":STACK:"
 
-    def _highlight(self, text: str, color: str) -> str:
+    def ascii_highlight(self, text: str, color: str) -> str:
+        """Highlight text using ASCII escape characters."""
         return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
 
     # Autocomplete
@@ -204,7 +205,7 @@ class PdbColor(Pdb):
             return code_line
 
         start, end = line_number.span()
-        line_number = self._highlight(code_line[start:end], "yellow")
+        line_number = self.ascii_highlight(code_line[start:end], "yellow")
 
         new_msg = code_line[:start] + line_number
         if code_line[end + 2 : end + 4] == "->":
