@@ -2,6 +2,7 @@ import linecache
 import re
 import rlcompleter
 import sys
+from dataclasses import dataclass
 from pdb import Pdb
 
 from pygments import highlight
@@ -10,6 +11,18 @@ from pygments.formatters.terminal import TERMINAL_COLORS
 from pygments.lexer import RegexLexer
 from pygments.lexers import PythonLexer
 from pygments.token import Comment, Generic, Name
+
+
+@dataclass
+class Colorscheme:
+    breakpoint_: str = "purple"
+    currentline: str = "purple"
+    line_prefix: str = "purple"
+    eof: str = "green"
+    path_prefix: str = "green"
+    pdb: str = "purple"
+    prompt: str = "purple"
+    return_: str = "green"
 
 
 class PdbColor(Pdb):
@@ -44,23 +57,25 @@ class PdbColor(Pdb):
         skip=None,
         nosigint=False,
         readrc=True,
+        colorscheme: Colorscheme | None = None,
     ):
         super().__init__(completekey, stdin, stdout, skip, nosigint, readrc)
         self.colors = TERMINAL_COLORS.copy()
         self.colors[Comment] = ("green", "brightgreen")
+        self.colorscheme = colorscheme if colorscheme else Colorscheme()
 
         self.python_lexer = PythonLexer()
         self.path_lexer = PathLexer()
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
-        self.prompt = self._highlight("(Pdb) ", "purple")
-        self.breakpoint_char = self._highlight("B", "purple")
-        self.currentline_char = self._highlight("->", "purple")
-        self.prompt_char = self._highlight(">>", "purple")
-        self.line_prefix = self._highlight("->", "purple")
-        self._return = self._highlight("--Return--", "green")
-        self.path_prefix = self._highlight(">", "green") + " "
-        self.eof = self._highlight("[EOF]", "green")
+        self.prompt = self._highlight("(Pdb) ", self.colorscheme.pdb)
+        self.breakpoint_char = self._highlight("B", self.colorscheme.breakpoint_)
+        self.currentline_char = self._highlight("->", self.colorscheme.currentline)
+        self.prompt_char = self._highlight(">>", self.colorscheme.prompt)
+        self.line_prefix = self._highlight("->", self.colorscheme.line_prefix)
+        self._return = self._highlight("--Return--", self.colorscheme.return_)
+        self.path_prefix = self._highlight(">", self.colorscheme.path_prefix) + " "
+        self.eof = self._highlight("[EOF]", self.colorscheme.eof)
         self.code_tag = ":TAG:"
         self.stack_tag = ":STACK:"
 
