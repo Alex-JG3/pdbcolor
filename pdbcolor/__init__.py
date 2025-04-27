@@ -12,6 +12,25 @@ from pygments.lexer import RegexLexer
 from pygments.lexers import PythonLexer
 from pygments.token import Comment, Generic, Name
 
+ANSIColors = {
+    "black": 30,
+    "red": 31,
+    "green": 32,
+    "yellow": 33,
+    "blue": 34,
+    "purple": 35,
+    "cyan": 36,
+    "white": 37,
+    "Black": 40,
+    "Red": 41,
+    "Green": 42,
+    "Yellow": 43,
+    "Blue": 44,
+    "Purple": 45,
+    "Cyan": 46,
+    "White": 47,
+}
+
 
 @dataclass
 class Colorscheme:
@@ -25,30 +44,12 @@ class Colorscheme:
     return_: str = "green"
 
 
-class PdbColor(Pdb):
-    _colors = {
-        "black": 30,
-        "red": 31,
-        "green": 32,
-        "yellow": 33,
-        "blue": 34,
-        "purple": 35,
-        "cyan": 36,
-        "white": 37,
-        "Black": 40,
-        "Red": 41,
-        "Green": 42,
-        "Yellow": 43,
-        "Blue": 44,
-        "Purple": 45,
-        "Cyan": 46,
-        "White": 47,
-        "bold": 1,
-        "light": 2,
-        "blink": 5,
-        "invert": 7,
-    }
+def ansi_highlight(text: str, color: str) -> str:
+    """Highlight text using ANSI escape characters."""
+    return f"\x1b[{ANSIColors[color]}m" + text + "\x1b[0m"
 
+
+class PdbColor(Pdb):
     def __init__(
         self,
         completekey="tab",
@@ -68,23 +69,19 @@ class PdbColor(Pdb):
         self.path_lexer = PathLexer()
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
-        self.prompt = self.ascii_highlight("(Pdb) ", self.colorscheme.pdb)
-        self.prompt_str = self.ascii_highlight(">>", self.colorscheme.prompt)
-        self.breakpoint_str = self.ascii_highlight("B", self.colorscheme.breakpoint_)
-        self.currentline_str = self.ascii_highlight("->", self.colorscheme.currentline)
+        self.prompt = ansi_highlight("(Pdb) ", self.colorscheme.pdb)
+        self.prompt_str = ansi_highlight(">>", self.colorscheme.prompt)
+        self.breakpoint_str = ansi_highlight("B", self.colorscheme.breakpoint_)
+        self.currentline_str = ansi_highlight("->", self.colorscheme.currentline)
 
-        self.line_prefix_str = self.ascii_highlight("->", self.colorscheme.line_prefix)
-        self.path_prefix_str = self.ascii_highlight("> ", self.colorscheme.path_prefix)
+        self.line_prefix_str = ansi_highlight("->", self.colorscheme.line_prefix)
+        self.path_prefix_str = ansi_highlight("> ", self.colorscheme.path_prefix)
 
-        self.eof_str = self.ascii_highlight("[EOF]", self.colorscheme.eof)
-        self.return_str = self.ascii_highlight("--Return--", self.colorscheme.return_)
+        self.eof_str = ansi_highlight("[EOF]", self.colorscheme.eof)
+        self.return_str = ansi_highlight("--Return--", self.colorscheme.return_)
 
         self.code_tag = ":TAG:"
         self.stack_tag = ":STACK:"
-
-    def ascii_highlight(self, text: str, color: str) -> str:
-        """Highlight text using ASCII escape characters."""
-        return f"\x1b[{self._colors[color]}m" + text + "\x1b[0m"
 
     # Autocomplete
     complete = rlcompleter.Completer(locals()).complete
@@ -235,7 +232,7 @@ class PdbColor(Pdb):
             return code_line
 
         start, end = line_number.span()
-        line_number = self.ascii_highlight(code_line[start:end], "yellow")
+        line_number = ansi_highlight(code_line[start:end], "yellow")
 
         new_msg = code_line[:start] + line_number
         if code_line[end + 2 : end + 4] == "->":
