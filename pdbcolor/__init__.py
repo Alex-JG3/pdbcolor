@@ -49,7 +49,7 @@ class PdbColor(Pdb):
         self.colors = TERMINAL_COLORS.copy()
         self.colors[Comment] = ("green", "brightgreen")
 
-        self.lexer = PythonLexer()
+        self.python_lexer = PythonLexer()
         self.path_lexer = PathLexer()
         self.formatter = TerminalFormatter(colorscheme=self.colors)
 
@@ -100,7 +100,7 @@ class PdbColor(Pdb):
         # Pygment's highlight function strips newlines at the start and end.
         # These lines are important so we add them back in later
         highlighted: str = highlight(
-            "".join(lines[first : last + 1]), self.lexer, self.formatter
+            "".join(lines[first : last + 1]), self.python_lexer, self.formatter
         ).splitlines(keepends=True)
 
         # Add tag to the end of each line to allow code lines to be more easily
