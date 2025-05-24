@@ -46,7 +46,9 @@ class Colorscheme:
 
 def ansi_highlight(text: str, color: str) -> str:
     """Highlight text using ANSI escape characters."""
-    return f"\x1b[{ANSIColors[color]}m" + text + "\x1b[0m"
+    start = f"\001\x1b[{ANSIColors[color]}m\002"
+    end = "\001\x1b[0m\002"
+    return start + text + end
 
 
 class PdbColor(Pdb):
